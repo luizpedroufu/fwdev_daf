@@ -27,7 +27,7 @@ static void port_cpu_sigint_handler(int sig_num)
     app_terminate_set();
 }
 
-static void port_cpu_systick_cbk(void *context) // Ponteiro genérico | callback do systick
+static void port_cpu_systick_cbk(/*void *context]*/) // Ponteiro genérico | callback do systick | apenas para mac
 {
     port_tick_count++;
 }
@@ -49,10 +49,8 @@ static void port_cpu_init(void)
 
 static void port_cpu_deinit(void)
 {
-
     pthread_join(&systick_thread, NULL); 
     port_cpu_init_flag = false;
-
 }
 
 static void port_cpu_reset(void)

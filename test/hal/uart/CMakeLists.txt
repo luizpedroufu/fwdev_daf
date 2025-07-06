@@ -8,7 +8,7 @@ set(THREADS_PREFER_PTHREAD_FLAG TRUE)
 find_package(Threads REQUIRED)
 
 set(SOURCES
-    test.c
+    test_my_port.c
     ${CMAKE_SOURCE_DIR}/../../../source/app/app.c
     ${CMAKE_SOURCE_DIR}/../../../source/utl/utl_dbg.c
     ${CMAKE_SOURCE_DIR}/../../../source/utl/printf/utl_printf.c
@@ -16,6 +16,7 @@ set(SOURCES
     ${CMAKE_SOURCE_DIR}/../../../source/hal/hal.c
     ${CMAKE_SOURCE_DIR}/../../../source/hal/hal_cpu.c
     ${CMAKE_SOURCE_DIR}/../../../source/hal/hal_uart.c
+    ${CMAKE_SOURCE_DIR}/../../../source/hal/hal_serial_port.c
     ${CMAKE_SOURCE_DIR}/../../../source/port/common/port_stdout.c
     ${CMAKE_SOURCE_DIR}/../../../source/port/common/main.c
 )
@@ -26,6 +27,8 @@ elseif(APPLE)
     list(APPEND SOURCES ${CMAKE_SOURCE_DIR}/../../../source/port/mac/port_cpu.c)
     list(APPEND SOURCES ${CMAKE_SOURCE_DIR}/../../../source/port/mac/port_uart.c)
 elseif(UNIX)
+    list(APPEND SOURCES ${CMAKE_SOURCE_DIR}/../../../source/port/unix/port_cpu.c)
+    list(APPEND SOURCES ${CMAKE_SOURCE_DIR}/../../../source/port/unix/port_serial.c)
 
 endif()
 
