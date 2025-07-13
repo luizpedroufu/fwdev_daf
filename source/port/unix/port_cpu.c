@@ -49,7 +49,7 @@ static void port_cpu_init(void)
 
 static void port_cpu_deinit(void)
 {
-    pthread_join(&systick_thread, NULL); 
+    pthread_join(systick_thread, NULL); 
     port_cpu_init_flag = false;
 }
 

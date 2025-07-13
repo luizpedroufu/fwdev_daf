@@ -32,10 +32,14 @@ extern "C"
 #include "utl_printf.h"
 #include "utl_dbg.h"
 #include "hal_cpu.h"
+#include "hal_dac.h"
+#include "hal_serial_port.h"
 #include "hal_uart.h"
 
 extern hal_cpu_driver_t HAL_CPU_DRIVER;
+extern hal_serial_port_driver_t HAL_SERIAL_PORT_DRIVER;
 extern hal_uart_driver_t HAL_UART_DRIVER;
+extern hal_dac_driver_t HAL_DAC_DRIVER;
 
 void hal_init(void);
 void hal_deinit(void);
