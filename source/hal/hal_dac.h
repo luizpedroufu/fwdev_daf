@@ -52,6 +52,7 @@ typedef struct hal_dac_driver_t
     void (*start)(hal_dac_dev_t dev);
     void (*stop)(hal_dac_dev_t dev);
     void (*set_value)(hal_dac_dev_t dev, uint16_t value);
+    void (*set_freq)(hal_dac_dev_t dev, uint16_t freq);
     uint16_t (*get_value)(hal_dac_dev_t dev);
 }hal_dac_driver_t;
 
@@ -61,6 +62,7 @@ void hal_dac_configure(hal_dac_dev_t dev, dac_config_t config);
 void hal_dac_start(hal_dac_dev_t dev);
 void hal_dac_stop(hal_dac_dev_t dev);
 void hal_dac_set_value(hal_dac_dev_t dev, uint16_t value);
+void hal_dac_set_freq(hal_dac_dev_t dev, uint16_t freq);
 uint16_t hal_dac_get_value(hal_dac_dev_t dev);
 
 #ifdef __cplusplus

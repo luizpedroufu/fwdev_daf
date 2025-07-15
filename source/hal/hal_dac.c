@@ -33,6 +33,11 @@ void hal_dac_set_value(hal_dac_dev_t dev, uint16_t value)
     drv->set_value(dev, value);
 }
 
+void hal_dac_set_freq(hal_dac_dev_t dev, uint16_t freq)
+{
+    drv->set_freq(dev, freq);
+}
+
 uint16_t hal_dac_get_value(hal_dac_dev_t dev)
 {
     return(drv->get_value(dev));

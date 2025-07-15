@@ -2,6 +2,7 @@
 #include "app.h"
 
 static char *app_name = 0;
+volatile bool continue_flag = true;
 
 char *main_app_name_get(void)
 {
@@ -16,12 +17,12 @@ int main(int argc, char *argv[])
     hal_init();
     app_init();
     
-    while(app_terminate_get() == false)
+    while(continue_flag)
     {
         // protect against from any other running threads and 
         // simulates a better behavior of code running from main (non interrupt context)
         uint32_t state = hal_cpu_critical_section_enter(HAL_CPU_CS_USER_LEVEL);
-        app_loop();
+        continue_flag = app_loop();
         hal_cpu_critical_section_leave(state);
     }
 

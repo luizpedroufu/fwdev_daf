@@ -4,7 +4,7 @@
 #include "app.h"
 
 #define SAMPLE_RATE 44100
-#define FREQUENCY 500.0f
+#define FREQUENCY 100.0f
 #define FRAMES_PER_BUFFER 64
 
 #define PI 3.141592f
@@ -35,7 +35,10 @@ static int callback(const void *in, void *out, unsigned long frames, const PaStr
     float *buff = (float*)out;
     hal_dac_dev_t aux = (hal_dac_dev_t)userData;
 
-    (void) in; (void) timeInfo; (void) statusFlags;
+    (void)in; 
+    (void)timeInfo;
+    (void)statusFlags;
+
     for(unsigned long i = 0; i < frames; i++)
     {
         buff[i] = (float)(aux->amplitude * sin(aux->sine.phase));
@@ -167,6 +170,14 @@ static void port_dac_set_value(hal_dac_dev_t dev, uint16_t value)
     }
 }
 
+static void port_dac_set_freq(hal_dac_dev_t dev, uint16_t freq)
+{
+    if(!dev)
+        return;
+
+    dev->sine.phase_inc = 2 * PI * freq / dev->sampling_rate;
+}
+
 static uint16_t port_dac_get_value(hal_dac_dev_t dev)
 {
     switch (dev->cfg.resolution)
@@ -186,5 +197,6 @@ hal_dac_driver_t HAL_DAC_DRIVER =
     .start = port_dac_start,
     .stop = port_dac_stop,
     .set_value = port_dac_set_value,
+    .set_freq = port_dac_set_freq,
     .get_value = port_dac_get_value,
 };
