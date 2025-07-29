@@ -170,7 +170,7 @@ static void port_dac_set_value(hal_dac_dev_t dev, uint16_t value)
     }
 }
 
-static void port_dac_set_freq(hal_dac_dev_t dev, uint16_t freq)
+static void port_dac_set_freq(hal_dac_dev_t dev, float freq)
 {
     if(!dev)
         return;
