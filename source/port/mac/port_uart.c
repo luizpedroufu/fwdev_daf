@@ -237,7 +237,6 @@ static void port_uart_close(hal_uart_dev_t pdev)
 {
     if(pdev->in_use)
     {
-        
         pdev->in_use = false;
         pthread_join(pdev->thread, NULL);
         close(pdev->file);
