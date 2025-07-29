@@ -25,7 +25,7 @@ Nessa seção vamos esclarecer esses pontos e discutir as funções de tratament
 
 No Cortex M4, o tratamento das interrupções passa a ser feito pelo componentes NVIC, que é o controlador de interrupções aninhadas vetorizadas. Enquanto a origem das interrupções possa variar, vindo do núcleo Cortex ou do integrador, o NVIC é o responsável por gerenciar todas interrupções. O fato de serem originadas de locais diferentes muda apenas a forma como essas interrupções são habilitadas e priorizadas, mas o tratamento é sempre feito pelo componente NVIC, com as mesmas regras.
 
-Como discutido na seção sobre a [partida do processador](./startup.md), existe uma tabela de vetores de interrupção que deve ser escrita no endereço de partida do processador, em geral o endereço `0x00000000`. Essa tabela contém os endereços das funções de tratamento de interrupção, que são chamadas quando uma interrupção ocorre. A exceção é o primeiro endereço da tabela cujo valor é, no fundo, o stack pointer, usado pelo processador para saber onde está o topo da pilha, não sendo um endereço de função de tratamento de interrupção.
+Como discutido na seção sobre a [partida do processador](./cortexm.md), existe uma tabela de vetores de interrupção que deve ser escrita no endereço de partida do processador, em geral o endereço `0x00000000`. Essa tabela contém os endereços das funções de tratamento de interrupção, que são chamadas quando uma interrupção ocorre. A exceção é o primeiro endereço da tabela cujo valor é, no fundo, o stack pointer, usado pelo processador para saber onde está o topo da pilha, não sendo um endereço de função de tratamento de interrupção.
 
 Vamos apresentar as interrupções seguindo os vetores de interrupção. A primeira coluna é o index dentro dessa tabela, lembrando que cada endereço é de 4 bytes, logo o índice 4 está relacionado ao endereço 16 (0x00000010). Depois temos o valor usado na enumeração do CMSIS onde os valores negativos são úteis para o CMSIS calcular o registro SHP (_System Handler Priority Register_) correto dentro do SCB. Informações adicionais são apresentadas indicando se a interrupção é mascarável ou não, quais são os registros que configuram a prioridade e uma breve descrição da interrupção.
 
@@ -368,3 +368,40 @@ A função `port_cpu_critsec_leave()` complementa a operação anterior, restaur
 Essa implementação oferece uma base sólida para desenvolvimento seguro em ambientes multitarefa ou com requisitos críticos de temporização. Ao preservar o estado original de maneira precisa e permitir o controle seletivo de prioridades, ela permite a construção de sistemas embarcados confiáveis, com controle fino sobre o comportamento de interrupções.
 
 Infelizmente, dada a semântica de uso do `BASEPRI` onde o valor zero indica que nenhuma interrupção será mascarada, não é possível usar somente o `BASEPRI` para desabilitar todas as interrupções. 
+
+## Detalhamento do NVIC
+
+> [!NOTE]
+> :robot: 
+
+O NVIC é o componente central para o gerenciamento de interrupções externas e algumas exceções internas. Ele é configurado por meio de registros localizados no **System Control Space (SCS)**, que é uma região de memória mapeada a partir do endereço `0xE000E000`. Abaixo estão os principais grupos de registros do NVIC:
+
+### 3.1 Registros de Configuração de Interrupções Externas
+
+O NVIC possui bancos de registros de 32 bits para configurar interrupções externas, onde cada bit controla uma interrupção específica. Para uma interrupção externa com número IRQn = 65, por exemplo, a configuração estará no bit 1 do terceiro registrador de 32 bits no banco correspondente, e seu número de exceção será 81 (16 + 65). Os principais registros incluem:
+
+- **ISER (Interrupt Set-Enable Registers)**: Habilita interrupções escrevendo 1 no bit correspondente. Uma leitura retorna 1 se a interrupção está habilitada.
+- **ICER (Interrupt Clear-Enable Registers)**: Desabilita interrupções escrevendo 1 no bit correspondente.
+- **ISPR (Interrupt Set-Pending Registers)**: Define o estado pendente de uma interrupção escrevendo 1. Uma leitura retorna 1 se a interrupção está pendente.
+- **ICPR (Interrupt Clear-Pending Registers)**: Limpa o estado pendente de uma interrupção escrevendo 1.
+- **IABR (Interrupt Active Bit Registers, não disponível em Cortex-M0/M0+)**: Leitura retorna 1 se a interrupção está ativa.
+- **IPR (Interrupt Priority Registers)**: Configura a prioridade de cada interrupção usando 8 bits por interrupção. O número de bits implementados depende do microcontrolador (geralmente 2 a 8 bits, com os bits mais significativos usados para prioridade preemptiva).
+
+### Registros de Controle de Sistema
+
+Além dos registros do NVIC, o **System Control Block (SCB)** no SCS contém registros para configurar exceções do sistema:
+
+- **SHCSR (System Handler Control and State Register)**: Controla e monitora o estado de exceções como MemManage, BusFault e UsageFault. Bits como MEMFAULTENA, BUSFAULTENA e USGFAULTENA habilitam essas exceções.
+- **CFSR (Configurable Fault Status Register)**: Fornece detalhes sobre falhas (MemManage, BusFault, UsageFault). Por exemplo, o bit UNALIGNED indica acessos não alinhados, e o bit NOCP indica tentativa de uso de um coprocessador desabilitado.
+- **HFSR (Hard Fault Status Register)**: Indica a causa de um HardFault, como escalonamento de outra exceção desabilitada (bit FORCED).
+- **MMFAR e BFAR**: Registradores que armazenam os endereços de memória que causaram falhas MemManage ou BusFault, respectivamente, se o bit MMARVALID ou BFARVALID estiver definido.
+- **VTOR (Vector Table Offset Register)**: Define o endereço base da tabela de vetores, permitindo sua realocação para RAM.
+
+### Depuração de Falhas
+
+Falhas como HardFault, BusFault e UsageFault são comuns em sistemas embarcados. Para depurá-las:
+
+- **Inspecionar registros de falha** (CFSR, HFSR, MMFAR, BFAR) para identificar a causa (e.g., acesso desalinhado, divisão por zero).
+- **Erros imprecisos**: Falhas assíncronas (e.g., escritas em buffer) podem dificultar a identificação do código causador. O uso do Embedded Trace Macrocell (ETM) pode ajudar a rastrear instruções recentes.
+- **Modo DebugMonitor**: Permite depuração em tempo de execução sem parar o núcleo, configurando a prioridade do DebugMonitor via SHPR3.
+
