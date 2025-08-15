@@ -135,13 +135,9 @@ Se a FPU estiver habilitada e em uso, registradores de ponto flutuante (S0–S15
 
 Esse mecanismo baseado em `EXC_RETURN` reforça a simplicidade e a previsibilidade do modelo de exceções do Cortex-M4, garantindo que o retorno à execução normal seja realizado de forma segura e automática após a manipulação de eventos assíncronos.
 
-
-
-
-
 Durante o retorno:
 
-1. O Cortex-M4 detecta o valor EXC_RETURN no LR
+1. O Cortex-M4 avalia o valor do EXC_RETURN no LR quando a instrução `BX LR` é executada
 2. Automaticamente restaura os registros salvos na pilha (em ordem inversa)
 3. Atualiza o SP
 4. Retoma a execução no endereço contido em PC
@@ -150,3 +146,37 @@ Esse mecanismo permite alternância eficiente entre tarefas e interrupções, se
 
 A estrutura simples, previsível e em hardware do empilhamento e desempilhamento no Cortex-M4 é um dos fatores que contribuem para sua eficiência em aplicações de tempo real.
 
+##
+
+Ao entrar na interrupção, observar:
+
+https://interrupt.memfault.com/blog/cortex-m-rtos-context-switching
+
+REGISTRO CONTROL:
+
+
+SFPA indica se o ponto flutuante seguro está ativo ou inativo (V8M somente)
+FPCA indica se o contexto de ponto flutuante está ativo ou não
+SPSEL controla qual ponteiro de pilha está em uso no modo thread (0 = MSP, 1 = PSP). Entraremos em mais detalhes a seguir. O modo handler sempre usa MSP.
+nPriv controla se o modo de thread está operando como privilegiado (0) ou não (1).
+
+
+
+Uso dos registros em EABI Cortex M
+
+- R12: Usado como registrador de link (LR) em algumas convenções de chamada.
+- R7: Usado como registrador de frame pointer (FP) em algumas convenções de chamada.
+- 
+
+
+
+
+https://github.com/ARM-software/abi-aa/releases
+
+https://stackoverflow.com/questions/261419/what-registers-to-save-in-the-arm-c-calling-convention
+
+r0-r3 are the argument and scratch registers also know as caller-saved or call-clobbered registers; r0-r1 are also the result registers. Callers must assume function-calls overwrite these registers, even if there are no arguments.
+r4-r8 are callee-save registers
+r9 might be a callee-save register or not (on some variants of AAPCS it is a special register)
+r10-r11 are callee-save registers
+r12-r15 are special registers
