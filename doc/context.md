@@ -59,11 +59,11 @@ Essa função configura o PSP para usar o topo de uma pilha alocada estaticament
 
 Quando ocorre uma interrupção, o Cortex-M4 realiza automaticamente o empilhamento de parte do contexto da CPU na pilha ativa (sempre o MSP). Os seguintes registradores são salvos:
 
-- R0–R3: registradores de argumentos
-- R12: registrador de uso geral
-- LR: Link Register
-- PC: Program Counter
 - xPSR: Status Register completo (APSR + EPSR + IPSR)
+- PC: Program Counter
+- LR: Link Register
+- R12: registrador de uso geral
+- R0–R3: registradores de argumentos
 
 Esse processo é feito em hardware, de forma determinística, antes da execução do handler. Se a FPU estiver habilitada e usada, os registradores S0–S15 e FPSCR também são salvos automaticamente.
 
@@ -71,21 +71,21 @@ Esse processo é feito em hardware, de forma determinística, antes da execuçã
 
 ```ascii
    +------------------+ <- endereço mais baixo da pilha após interrupção
-   |      xPSR        |
-   +------------------+
-   |       PC         |
-   +------------------+
-   |       LR         |
-   +------------------+
-   |      R12         |
-   +------------------+
-   |      R3          |
-   +------------------+
-   |      R2          |
+   |      R0          |
    +------------------+
    |      R1          |
    +------------------+
-   |      R0          |
+   |      R#          |
+   +------------------+
+   |      R3          |
+   +------------------+
+   |      R12         |
+   +------------------+
+   |      LR          |
+   +------------------+
+   |      PC          |
+   +------------------+
+   |      xPSR        |
    +------------------+ <- valor do SP no início da ISR
 ```
 
